@@ -1,6 +1,15 @@
 const express = require('express')
 const logger = require('morgan')
 const cors = require('cors')
+// const mongoose = require('mongoose');
+
+// const DB_HOST = "mongodb+srv://Ludmila:gDTmToTiSDYtS2R2@cluster0.0pjysdr.mongodb.net/db-contacts?retryWrites=true&w=majority"
+
+// // mongoose.set('scriptQuery', true);
+
+// mongoose.connect(DB_HOST)
+//     .then(() => console.log("Darabase connect success"))
+//     .catch(error => console.log(error.message))
 
 const contactsRouter = require('./routes/api/contacts')
 
@@ -24,3 +33,6 @@ app.use((err, req, res, next) => {
 })
 
 module.exports = app
+
+// gDTmToTiSDYtS2R2
+// mongodb+srv://Ludmila:gDTmToTiSDYtS2R2@cluster0.0pjysdr.mongodb.net/
