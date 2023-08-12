@@ -6,27 +6,30 @@ const {
   validateBody,
   isValidId,
   validateBodyFavorite,
+  authenticate,
 } = require("../../middlewapres");
 
 const { schemas } = require("../../models/contact");
 
-router.get("/", controll.getAll);
+router.get("/", authenticate, controll.getAll);
 
-router.get("/:contactId", isValidId, controll.getById);
+router.get("/:contactId", authenticate, isValidId, controll.getById);
 
-router.post("/", validateBody(schemas.addSchema), controll.add);
+router.post("/", authenticate, validateBody(schemas.addSchema), controll.add);
 
 router.patch(
   "/:contactId/favorite",
+  authenticate,
   isValidId,
   validateBodyFavorite(schemas.updateFavoriteSchema),
   controll.updateFavorite
 );
 
-router.delete("/:contactId", isValidId, controll.removeById);
+router.delete("/:contactId", authenticate, isValidId, controll.removeById);
 
 router.put(
   "/:contactId",
+  authenticate,
   isValidId,
   validateBody(schemas.addSchema),
   controll.updateById
