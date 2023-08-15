@@ -8,7 +8,7 @@ const app = require('./app')
 
 mongoose.connect(DB_HOST)
     .then(() => {
-      app.listen(3000)
+      app.listen()
       console.log("Darabase connect success")
     })
     .catch(error => {
