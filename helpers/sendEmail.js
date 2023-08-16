@@ -1,38 +1,24 @@
-const ElasticEmail = require('@elasticemail/elasticemail-client');
-require('dotenv').config();
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
-const {ELESTICEMEIL_API_KEY} = process.env;
- 
-const defaultClient = ElasticEmail.ApiClient.instance;
- 
-const {apikey} = defaultClient.authentications;
-apikey.apiKey = ELESTICEMEIL_API_KEY;
- 
-const api = new ElasticEmail.EmailsApi()
- 
-const email = ElasticEmail.EmailMessageData.constructFromObject({
-  Recipients: [
-    new ElasticEmail.EmailRecipient("tofet55015@vreaa.com")
-  ],
-  Content: {
-    Body: [
-      ElasticEmail.BodyPart.constructFromObject({
-        ContentType: "HTML",
-        Content: "My test email content ;)"
-      })
-    ],
-    Subject: "Verify email",
-    From: "nikitenko.lyudmila@gmail.com"
-  }
-});
- 
-const sendEmail= function(error, data, response) {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('API called successfully.');
-  }
+const { META_PASSVORD } = process.env;
+
+const nodemailerConfig = {
+  host: "smtp.meta.ua",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "ludmilanikitenko0703@meta.ua",
+    pass: META_PASSVORD,
+  },
 };
-api.emailsPost(email, sendEmail);
 
-module.export = sendEmail;
+const transport = nodemailer.createTransport(nodemailerConfig);
+
+const sendEmail = async (data) => {
+  const email = { ...data, from: "ludmilanikitenko0703@meta.ua" };
+  await transport.sendMail(email);
+  return true;
+};
+
+module.exports = sendEmail;

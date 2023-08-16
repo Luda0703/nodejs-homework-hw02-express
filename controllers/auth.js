@@ -1,15 +1,15 @@
 const { User } = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const gravatar = require('gravatar');
-const path = require('path');
-const fs = require('fs/promises');
-const Jimp = require('jimp');
-const {nanoid} = require('nanoid');
+const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs/promises");
+const Jimp = require("jimp");
+const { nanoid } = require("nanoid");
 
 const { SECRET_KEY, BASE_URL } = process.env;
 
-const avatarsDir = path.join(__dirname, '../', 'public', 'avatars');
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 const { HttpError, ctrlWrapper, sendEmail } = require("../helpers");
 
@@ -25,13 +25,18 @@ const register = async (req, res) => {
   const avatarURL = gravatar.url(email);
   const verificationToken = nanoid();
 
-  const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL, verificationToken });
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+    verificationToken,
+  });
 
   const verifyEmail = {
     to: email,
-    subject: 'Verify email',
+    subject: "Verify email",
     html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click to verify email</a>`,
-  }
+  };
 
   await sendEmail(verifyEmail);
 
@@ -39,51 +44,51 @@ const register = async (req, res) => {
     user: {
       email: newUser.email,
       subscription: newUser.subscription,
-      // avatarURL: newUser.avatarURL,
-      // verifyEmail: newUser.verifyEmail,
     },
   });
 };
 
 const verify = async (req, res) => {
-    const {verificationToken} = req.perems;
-    const user = await User.findOne(verificationToken);
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
 
-    if(!user) {
-      throw HttpError(404, 'Not found');
-    }
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
 
-  await User.findByIdAndUpdate(user._id, {verify: true, verificationToken: ''});
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: "",
+  });
 
   res.json({
-    message: "Email verify success"
-  })
+    message: "Verification successful",
+  });
 };
 
 const resendVerify = async (req, res) => {
-    const {email} = req.body;
-    const user = await User.findOne({email});
+  const { email } = req.body;
+  const user = await User.findOne({ email });
 
-    if(user.verify) {
-      throw HttpError(400, "Verification has already been passed");
-    }
+  if (user.verify) {
+    throw HttpError(400, "Verification has already been passed");
+  }
 
-    if(!user) {
-      throw HttpError(400, "missing required field email");
-    }
+  if (!user) {
+    throw HttpError(400, "missing required field email");
+  }
 
-    const verifyEmail = {
-      to: email,
-      subject: 'Verify email',
-      html: `<a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">Click to verify email</a>`,
-    }
-  
-    await sendEmail(verifyEmail);
+  const verifyEmail = {
+    to: email,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${BASE_URL}/users/verify/${user.verificationToken}">Click to verify email</a>`,
+  };
 
-    res.json({
-      message: "Verify email send success"
-    })
+  await sendEmail(verifyEmail);
 
+  res.json({
+    message: "Verification email sent",
+  });
 };
 
 const login = async (req, res) => {
@@ -93,7 +98,7 @@ const login = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  if(!user.verify) {
+  if (!user.verify) {
     throw HttpError(400, "Verification has already been passed");
   }
 
@@ -134,27 +139,27 @@ const logout = async (req, res) => {
   res.status(204).json();
 };
 
-const updateAvatar = async(req, res) => {
+const updateAvatar = async (req, res) => {
   const { _id } = req.user;
-   const {path: tempUpload, originalname} = req.file;
-   const filename = `${_id}_${originalname}`;
-   const resultUpload = path.join(avatarsDir, filename);
+  const { path: tempUpload, originalname } = req.file;
+  const filename = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarsDir, filename);
 
-   const image = await Jimp.read(tempUpload);
-   await image.resize(250, 250).writeAsync(tempUpload);
+  const image = await Jimp.read(tempUpload);
+  await image.resize(250, 250).writeAsync(tempUpload);
 
-   await fs.rename(tempUpload, resultUpload);
-   const avatarURL = path.join('avatars', filename);
-   const user = await User.findByIdAndUpdate(_id, {avatarURL});
+  await fs.rename(tempUpload, resultUpload);
+  const avatarURL = path.join("avatars", filename);
+  const user = await User.findByIdAndUpdate(_id, { avatarURL });
 
-   if (!user) {
+  if (!user) {
     throw HttpError(401, "Not authorized");
-}
+  }
 
-   res.json({
+  res.json({
     avatarURL,
-   })
-}
+  });
+};
 
 module.exports = {
   register: ctrlWrapper(register),

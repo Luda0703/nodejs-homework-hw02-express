@@ -54,6 +54,7 @@ const emailShema = Joi.object({
 const schemas = {
   registerShema,
   loginShema,
+  emailShema,
 };
 
 const User = model("user", userSchema);
