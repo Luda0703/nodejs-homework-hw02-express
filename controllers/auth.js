@@ -99,7 +99,7 @@ const login = async (req, res) => {
   }
 
   if (!user.verify) {
-    throw HttpError(400, "Verification has already been passed");
+    throw HttpError(400, 'Verify token is required');
   }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
